@@ -6,8 +6,14 @@ import pandas as pd
 ext_ccs = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 ext_css1 = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 
-df = pd.read_csv('clean_diabetes.csv')
+df = pd.read_csv("lex.csv")
 
+markdown_text = """
+This is a markdown text... blabla
+I´m very excited about Dash and Python
+web visualization :-)
+
+"""
 
 def generate_table(df, max_rows=10):
     return html.Table(
@@ -40,20 +46,79 @@ app.layout = html.Div(style={"backgroundColor": colors["background"]}, children=
     Dash: A web Application framework for Python.
     
     """),
+    dcc.Markdown(children=markdown_text),
+    html.Label("Dropdown"),
+    dcc.Dropdown(
+        options=[
+            {"label":"New York City","value":"NYC"},
+            {"label":"Tokyo","value":"TYO"},
+            {"label":"Imst","value":"IM"}
+        ],
+        value="MTL"
+    ),
+    html.Label("Multi Select Dropdown"),
+    dcc.Dropdown(
+        options=[
+            {"label":"New York City","value":"NYC"},
+            {"label":"Tokyo","value":"TYO"},
+            {"label":"Imst","value":"IM"}
+        ],
+        value=["TYO","IM"],
+        multi=True
+    ),
+    html.Label("Radio Items"),
+    dcc.RadioItems(
+        options=[
+            {"label": "New York City", "value": "NYC"},
+            {"label": "Tokyo", "value": "TYO"},
+            {"label": "Imst", "value": "IM"}
+        ],
+        value="TYO"
+    ),
+    html.Label("Checkboxes"),
+    dcc.Checklist(
+        options=[
+            {"label":"New York City","value":"NYC"},
+            {"label":"Tokyo","value":"TYO"},
+            {"label":"Imst","value":"IM"}
+        ],
+        value=["TYO","IM"]
+    ),
+    html.Label("Text Input"),
+    dcc.Input(value="IM",type="text"),
+    html.Label("Slider"),
+    dcc.Slider(
+        min=0,
+        max=9,
+        marks={i:"Label {}".format(i) if i == 1 else str(i) for i in range(1,6)},
+        value=5,
+    ),
+
+
     dcc.Graph(
         id="sample_graph",
         figure={
             "data": [
-                {"x": [1, 3, 2, 5, 6], "y": [5, 5, 6, 2, 3], "type": "bar", "name": "Imst"},
-                {"x": [12, 4, 5, 5, 6], "y": [6, 9, 1, 5, 6], "type": "bar", "name": "Innsbruck"},
+                dict(
+                    x=df[df.continent==i]["gdp per capita"],
+                    y=df[df.continent==i]["life expectancy"],
+                    text=df[df.continent==i]["country"],
+                    mode="markers",
+                    opacity=0.7,
+                    marker={
+                        "size":15,
+                        "line":{"width":0.5, "color":"white"}
+                    },
+                    name=i
+                )for i in df.continent.unique()
             ],
-            "layout": {
-                "plot_bgcolor": colors["background"],
-                "paper_bgcolor": colors["background"],
-                "font": {"color": colors["text"]},
-                "title": "Dash Sample Data Viz"
-
-            }
+            "layout": dict(
+                xaxis={"type":"log","title":"GDP per Capita"},
+                yaxis={"title":"Life Expectancy"},
+                margin={"l":40,"b":40,"t":10,"r":10},
+                legend={"x":0,"y":1},
+                hovermode="closest"
+            )
         }
     )
 ])
